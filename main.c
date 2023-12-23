@@ -2,10 +2,10 @@
 
 int main()
 {
-    srand(1);
+    srand(time(NULL));
     Game *game = createGame(SIZE, NB_BOAT);
     displayBoard(game->playerBoard, 1);
-    displayBoard(game->computerBoard, 1);
+    displayBoard(game->computerBoard, 0);
     do
     {
         playerTurn(game);

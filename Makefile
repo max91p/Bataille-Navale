@@ -11,3 +11,9 @@ bataille_navale: main.o fonctions.o
 	
 clean:
 	@rm -f *.o 
+
+doc:
+	doxygen -g
+	doxygen Doxyfile
+
+

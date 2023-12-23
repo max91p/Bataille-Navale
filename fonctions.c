@@ -1,6 +1,10 @@
 #include "fonctions.h"
 
-// function to create a board
+/*!
+ * \brief function to create a board
+ * \param size the size of the board
+ * \return the board
+ */
 Board *createBoard(int size)
 {
     // check if the size is correct
@@ -49,7 +53,14 @@ Board *createBoard(int size)
     return board;
 }
 
-// function to create a boat
+/*!
+ * \brief function to create a boat
+ * \param size the size of the boat
+ * \param x the x position of the boat
+ * \param y the y position of the boat
+ * \param orientation the orientation of the boat
+ * \return the boat
+ */
 Boat *createBoat(int size, int x, int y, Orientation orientation)
 {
     // check if the size is correct
@@ -87,7 +98,12 @@ Boat *createBoat(int size, int x, int y, Orientation orientation)
     return boat;
 }
 
-// function to check if the boat can be placed at a certain position
+/*!
+ * \brief function for check if a boat can be placed
+ * \param board the board
+ * \param boat the boat
+ * \return 1 if the boat can be placed, 0 otherwise
+ */
 int canPlaceBoat(Board *board, Boat *boat)
 {
     // check if the board is correct
@@ -127,9 +143,25 @@ int canPlaceBoat(Board *board, Boat *boat)
     return 1;
 }
 
-// function to place a boat on a board
+/*!
+ * \brief function to place a boat
+ * \param board the board
+ * \param boat the boat
+ */
 void placeBoat(Board *board, Boat *boat)
 {
+    // check if the board is correct
+    if (board == NULL)
+    {
+        printf("Error: the board is not correct\n");
+        exit(1);
+    }
+    // check if the boat is correct
+    if (boat == NULL)
+    {
+        printf("Error: the boat is not correct\n");
+        exit(1);
+    }
     int retour = 0;
     // check if the boat can be placed
     retour = canPlaceBoat(board, boat);
@@ -149,7 +181,12 @@ void placeBoat(Board *board, Boat *boat)
     }
 }
 
-// function to initialize the boats
+/*!
+ * \brief function to initialize the boats
+ * \param board the board
+ * \param boats the array of boats
+ * \param nbBoats the number of boats
+ */
 void initializeBoats(Board *board, Boat **boats, int nbBoats)
 {
     // check all the parameters
@@ -202,7 +239,12 @@ void initializeBoats(Board *board, Boat **boats, int nbBoats)
     }
 }
 
-// function to create a game
+/*!
+ * \brief function to create a game
+ * \param size the size of the board
+ * \param nbBoat the number of boats
+ * \return the game
+ */
 Game *createGame(int size, int nbBoat)
 {
     // check if the size is correct
@@ -248,7 +290,9 @@ Game *createGame(int size, int nbBoat)
     return game;
 }
 
-// function to clear the buffer
+/*!
+ * \brief function to clean the buffer
+ */
 void cleanBuffer()
 {
     int c = 0;
@@ -258,7 +302,11 @@ void cleanBuffer()
     }
 }
 
-// function to display the board
+/*!
+ * \brief function to display the board
+ * \param board the board
+ * \param isPlayer 1 if it's the player's board, 0 otherwise
+ */
 void displayBoard(Board *board, int isPlayer)
 {
     // check if the board is correct
@@ -325,7 +373,11 @@ void displayBoard(Board *board, int isPlayer)
     }
 }
 
-// function to check if the boat is wrecked
+/*!
+ * \brief function to check if a boat is wrecked
+ * \param boat the boat
+ * \return 1 if the boat is wrecked, 0 otherwise
+ */
 int isBoatWrecked(Boat *boat)
 {
     // check if the boat is correct
@@ -342,7 +394,13 @@ int isBoatWrecked(Boat *boat)
     return 0;
 }
 
-// function to fire a shot
+/*!
+ * \brief function to fire a shot
+ * \param board the board
+ * \param x the x position of the shot
+ * \param y the y position of the shot
+ * \param boats the array of boats
+ */
 void fireShot(Board *board, int x, int y, Boat **boats)
 {
     // check if the board is correct
@@ -418,7 +476,10 @@ void fireShot(Board *board, int x, int y, Boat **boats)
     }
 }
 
-// function to play a turn for the player
+/*!
+ * \brief function to play a turn for the player
+ * \param game the game
+ */
 void playerTurn(Game *game)
 {
     // check if the game is correct
@@ -455,7 +516,10 @@ void playerTurn(Game *game)
     displayBoard(game->computerBoard, 0);
 }
 
-// function to play a turn for the computer
+/*!
+ * \brief function to play a turn for the computer
+ * \param game the game
+ */
 void computerTurn(Game *game)
 {
     // check if the game is correct
@@ -479,7 +543,11 @@ void computerTurn(Game *game)
     displayBoard(game->playerBoard, 1);
 }
 
-// function to check if the player's boats are wrecked
+/*!
+ * \brief function to check if all player's boats are wrecked
+ * \param game the game
+ * \return 1 if all player's boats are wrecked, 0 otherwise
+ */
 int playerBoatsWrecked(Game *game)
 {
     // check if the game is correct
@@ -498,7 +566,11 @@ int playerBoatsWrecked(Game *game)
     return 1; // Tous les bateaux du joueur sont coulés
 }
 
-// function to check if the game is over
+/*!
+ * \brief function to check if the game is over
+ * \param game the game
+ * \return 1 if the game is over, 0 otherwise
+ */
 int isGameOver(Game *game)
 {
     // check if the game is correct
@@ -533,7 +605,10 @@ int isGameOver(Game *game)
     return playerBoatsWrecked || computerBoatsWrecked;
 }
 
-// function to free the memory
+/*!
+ * \brief function to free the memory
+ * \param game the game
+ */
 void freeGame(Game *game)
 {
     // check if the game is correct
