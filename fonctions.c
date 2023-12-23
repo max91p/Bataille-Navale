@@ -82,6 +82,7 @@ Boat *createBoat(int size, int x, int y, Orientation orientation)
     boat->x = x;
     boat->y = y;
     boat->orientation = orientation;
+    boat->hits = 0;
 
     return boat;
 }
@@ -266,6 +267,12 @@ void displayBoard(Board *board, int isPlayer)
         printf("Error: the board is not correct\n");
         exit(1);
     }
+    // check if the isPlayer is correct
+    if (isPlayer != 0 && isPlayer != 1)
+    {
+        printf("Error: the isPlayer is not correct\n");
+        exit(1);
+    }
 
     // display the board
     if (isPlayer == 1)
@@ -318,24 +325,124 @@ void displayBoard(Board *board, int isPlayer)
     }
 }
 
+// function to check if the boat is wrecked
+int isBoatWrecked(Boat *boat)
+{
+    // check if the boat is correct
+    if (boat == NULL)
+    {
+        printf("Error: the boat not correct\n");
+        exit(1);
+    }
+    // check if the boat is wrecked
+    if (boat->hits == boat->size)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+// function to fire a shot
+void fireShot(Board *board, int x, int y, Boat **boats)
+{
+    // check if the board is correct
+    if (board == NULL)
+    {
+        printf("Error: the board is not correct\n");
+        exit(1);
+    }
+    // check if the position is correct
+    if (x < 0 || x >= board->size || y < 0 || y >= board->size)
+    {
+        printf("Error: the position is not correct\n");
+        exit(1);
+    }
+    // check if the array of boats is correct
+    if (boats == NULL)
+    {
+        printf("Error: the array of boats is not correct\n");
+        exit(1);
+    }
+    // Check if the shot hit a boat
+    if (board->matrix[x][y] == BOAT)
+    {
+        // Find the boat that was hit
+        Boat *hitBoat = NULL;
+        for (int i = 0; i < NB_BOAT; i++)
+        {
+            for (int j = 0; j < boats[i]->size; j++)
+            {
+                int boatX = boats[i]->x;
+                int boatY = boats[i]->y;
+                if (boats[i]->orientation == HORIZONTAL)
+                {
+                    boatX += j;
+                }
+                else if (boats[i]->orientation == VERTICAL)
+                {
+                    boatY += j;
+                }
+                if (boatX == x && boatY == y)
+                {
+                    hitBoat = boats[i];
+                    break;
+                }
+            }
+            if (hitBoat != NULL)
+            {
+                break;
+            }
+        }
+        // Mark the shot as a hit
+        board->matrix[x][y] = WRECK;
+        printf("Touché\n");
+
+        // Increment the hits counter
+        hitBoat->hits++;
+
+        // Check if the boat is wrecked after marking the shot as a hit
+        if (isBoatWrecked(hitBoat))
+        {
+            printf("Coulé\n");
+        }
+    }
+    else if (board->matrix[x][y] == WRECK || board->matrix[x][y] == WATER_SHOT)
+    {
+        printf("Tu as déjà tiré ici\n");
+    }
+    else
+    {
+        // The shot missed
+        board->matrix[x][y] = WATER_SHOT;
+        printf("A l'eau\n");
+    }
+}
+
 // function to play a turn for the player
 void playerTurn(Game *game)
 {
+    // check if the game is correct
+    if (game == NULL)
+    {
+        printf("Error: the game is not correct\n");
+        exit(1);
+    }
     // ask the player to enter a position
     int x, y, retour = 0;
-    printf("Entrez la position x");
+    printf("Entrez la position x :");
     while (retour != 1)
     {
         retour = scanf("%d", &x);
         cleanBuffer();
     }
     retour = 0;
-    printf("Entrez la position y");
+    printf("Entrez la position y :");
     while (retour != 1)
     {
         retour = scanf("%d", &y);
         cleanBuffer();
     }
+    printf("\n");
     // check if the position is correct
     if (x < 0 || x >= game->playerBoard->size || y < 0 || y >= game->playerBoard->size)
     {
@@ -343,14 +450,124 @@ void playerTurn(Game *game)
         exit(1);
     }
     // fire at the position
-    if (game->computerBoard->matrix[x][y] == BOAT)
+    fireShot(game->computerBoard, x, y, game->computerBoats);
+    // display the board
+    displayBoard(game->computerBoard, 0);
+}
+
+// function to play a turn for the computer
+void computerTurn(Game *game)
+{
+    // check if the game is correct
+    if (game == NULL)
     {
-        game->computerBoard->matrix[x][y] = WRECK;
-        printf("Touché\n");
+        printf("Error: the game is not correct\n");
+        exit(1);
     }
-    else
+    // Generate random coordinates for the shot
+    int x, y;
+    do
     {
-        game->computerBoard->matrix[x][y] = WATER_SHOT;
-        printf("A l'eau\n");
+        x = rand() % game->playerBoard->size;
+        y = rand() % game->playerBoard->size;
+    } while (game->playerBoard->matrix[x][y] == WATER_SHOT || game->playerBoard->matrix[x][y] == WRECK);
+
+    // Fire shot
+    fireShot(game->playerBoard, x, y, game->playerBoats);
+
+    // Display the board
+    displayBoard(game->playerBoard, 1);
+}
+
+// function to check if the player's boats are wrecked
+int playerBoatsWrecked(Game *game)
+{
+    // check if the game is correct
+    if (game == NULL)
+    {
+        printf("Error: the game is not correct\n");
+        exit(1);
     }
+    for (int i = 0; i < NB_BOAT; i++)
+    {
+        if (!isBoatWrecked(game->playerBoats[i]))
+        {
+            return 0; // Un bateau du joueur n'est pas coulé
+        }
+    }
+    return 1; // Tous les bateaux du joueur sont coulés
+}
+
+// function to check if the game is over
+int isGameOver(Game *game)
+{
+    // check if the game is correct
+    if (game == NULL)
+    {
+        printf("Error: the game is not correct\n");
+        exit(1);
+    }
+    int playerBoatsWrecked = 1;
+    int computerBoatsWrecked = 1;
+
+    // check if all player's boats are wrecked
+    for (int i = 0; i < NB_BOAT; i++)
+    {
+        if (isBoatWrecked(game->playerBoats[i]) == 0)
+        {
+            playerBoatsWrecked = 0;
+            break;
+        }
+    }
+
+    // check if all computer's boats are wrecked
+    for (int i = 0; i < NB_BOAT; i++)
+    {
+        if (isBoatWrecked(game->computerBoats[i]) == 0)
+        {
+            computerBoatsWrecked = 0;
+            break;
+        }
+    }
+
+    return playerBoatsWrecked || computerBoatsWrecked;
+}
+
+// function to free the memory
+void freeGame(Game *game)
+{
+    // check if the game is correct
+    if (game == NULL)
+    {
+        printf("Error: the game is not correct\n");
+        exit(1);
+    }
+    // free the memory
+    for (int i = 0; i < game->playerBoard->size; i++)
+    {
+        free(game->playerBoard->matrix[i]);
+    }
+    free(game->playerBoard->matrix);
+    free(game->playerBoard);
+
+    for (int i = 0; i < game->computerBoard->size; i++)
+    {
+        free(game->computerBoard->matrix[i]);
+    }
+    free(game->computerBoard->matrix);
+    free(game->computerBoard);
+
+    for (int i = 0; i < NB_BOAT; i++)
+    {
+        free(game->playerBoats[i]);
+    }
+    free(game->playerBoats);
+
+    for (int i = 0; i < NB_BOAT; i++)
+    {
+        free(game->computerBoats[i]);
+    }
+    free(game->computerBoats);
+
+    free(game);
 }

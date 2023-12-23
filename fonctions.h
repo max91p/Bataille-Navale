@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 #define SIZE 10   // size of the board
 #define NB_BOAT 5 // number of boats
 
@@ -32,6 +33,7 @@ typedef struct
     int x;
     int y;
     Orientation orientation;
+    int hits;
 } Boat;
 
 // structure for the board
@@ -73,5 +75,26 @@ void cleanBuffer();
 
 // function to display the board
 void displayBoard(Board *board, int isPlayer);
+
+// function to check if the boat is wrecked
+int isBoatWrecked(Boat *boat);
+
+// function to fire a shot
+void fireShot(Board *board, int x, int y, Boat **boats);
+
+// function for the player turn
+void playerTurn(Game *game);
+
+// function to play a turn for the computer
+void computerTurn(Game *game);
+
+// function to check if the game is over
+int isGameOver(Game *game);
+
+// function to free the memory
+void freeGame(Game *game);
+
+// function to check if the player boats are wrecked
+int playerBoatsWrecked(Game *game);
 
 #endif // FONCTIONS_H
